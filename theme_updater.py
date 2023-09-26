@@ -69,7 +69,6 @@ def get_theme_stocks(today_theme_code):
     
 
 def update_today_theme_info():
-    # 추후 NoSQL로 쌓을 예정
     today_theme = read_today_theme()
     today_theme_code = today_theme.index.values
     theme_stocks = get_theme_stocks(today_theme_code)
