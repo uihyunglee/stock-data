@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
+import pymysql
 
 
 def get_last_page(html):
@@ -33,7 +34,7 @@ def read_today_theme():
         col_type1 = bs.findAll('td', class_='col_type1')
         theme_name = list(map(lambda x: x.getText(), col_type1))
         theme_code = list(map(lambda x: x.a['href'].split('=')[-1], col_type1))
-
+        
         col_type2 = bs.findAll('td', class_='number col_type2')
         theme_rtn = list(map(lambda x: x.getText()[6:-7], col_type2))
         
@@ -64,18 +65,50 @@ def get_theme_stocks(today_theme_code):
         stock_codes = list(map(lambda x: 'A' + x.a['href'].split('=')[-1], name_area))
         theme_stocks[theme_code] = stock_codes
         
-        print(f'Theme Update: {cnt} / {finish}', end='\r')
+        print(f'Theme Read: {cnt} / {finish}', end='\r')
     return theme_stocks
     
 
 def update_today_theme_info():
+    with open('db_info.json', 'r') as json_file:
+        db_info = json.load(json_file)
+    conn = pymysql.connect(**db_info)
+
+    with conn.cursor() as curs:
+        sql = """
+        CREATE TABLE IF NOT EXISTS theme (
+            dateint INT(10),
+            theme_code VARCHAR(10),
+            theme_name VARCHAR(40),
+            prev_day_rtn FLOAT,
+            stock_code LONGTEXT,
+            updated_at TIMESTAMP,
+            PRIMARY KEY (dateint, theme_code))
+        """
+        curs.execute(sql)
+    conn.commit()
+    
     today_theme = read_today_theme()
     today_theme_code = today_theme.index.values
     theme_stocks = get_theme_stocks(today_theme_code)
     
-    today = dt.now().strftime('%Y%m%d')
-    with open(f"daily_theme_data/{today}.json", "w") as json_file:
-        json.dump(theme_stocks, json_file, indent=4)
+    today = dt.now()
+    today_int = int(today.strftime('%Y%m%d'))
+    finish = len(theme_stocks)
+    with conn.cursor() as curs:
+        for cnt, k in enumerate(theme_stocks, start=1):
+            theme_name = today_theme.loc[k,'name']
+            theme_rtn = today_theme.loc[k,'rtn']
+            stock_code = ','.join(theme_stocks[k])
+            
+            sql = f"""
+            REPLACE INTO theme VALUES (
+                {today_int}, '{k}', '{theme_name}', {theme_rtn}, '{stock_code}', '{today}')
+            """
+            curs.execute(sql)
+            conn.commit()
+            
+            print(f'Theme Update: {cnt} / {finish}', end='\r')
         
     print('Theme Data Update: Success')
     
