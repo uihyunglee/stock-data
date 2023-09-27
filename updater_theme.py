@@ -116,8 +116,5 @@ def update_today_theme_info():
 # 평일 오전 8시 30분 실행 예정
 if __name__ == '__main__':  
     today = dt.today().weekday
-    if today == 5 or today == 6:
-        sys.exit(0)
-    
-    update_today_theme_info()
-    sys.exit(0)
+    if today != 5 and today != 6:
+        update_today_theme_info()
