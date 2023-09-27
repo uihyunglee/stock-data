@@ -1,5 +1,6 @@
 import ctypes
 from datetime import datetime as dt
+from datetime import timedelta as td
 import win32com.client
 import json
 
@@ -11,6 +12,7 @@ cpStatus = win32com.client.Dispatch('CpUtil.CpCybos') # 시스템 상태 정보
 cpTradeUtil = win32com.client.Dispatch('CpTrade.CpTdUtil') # 주문 관련 도구
 cpStockCode = win32com.client.Dispatch("CpUtil.CpStockCode")
 cpCodeMgr = win32com.client.Dispatch("CpUtil.CpCodeMgr")
+cpStockChart = win32com.client.Dispatch("CpSysDib.StockChart")
 
 
 class PriceUpdater:
@@ -109,3 +111,15 @@ class PriceUpdater:
                 
         print('Company information Update: Success')
 
+    def get_start_date(self):
+        with self.conn.cursor() as curs:
+            sql = "SELECT max(dateint) FROM daily_price"
+            curs.execute(sql)
+            rs = curs.fetchone()
+            last_date = rs[0]
+        if last_date == None:
+            start_date = 20130101
+        else:
+            next_day = dt.strptime(str(last_date), '%Y%m%d') + td(days=1)
+            start_date = int(next_day.strftime('%Y%m%d'))
+        return start_date
