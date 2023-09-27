@@ -58,6 +58,7 @@ class PriceUpdater:
                 adj_ratio INT(10),
                 org_na BIGINT(20),
                 org_cum_na BIGINT(20),
+                updated_at TIMESTAMP,
                 PRIMARY KEY (dateint, sh7code))
             """
             curs.execute(sql)
