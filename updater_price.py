@@ -124,3 +124,51 @@ class PriceUpdater:
             next_day = dt.strptime(str(last_date), '%Y%m%d') + td(days=1)
             start_date = int(next_day.strftime('%Y%m%d'))
         return start_date
+    
+    def update_daily_price_info(self):
+        today = dt.now()
+        start_date = self.get_start_date()
+        end_date = int(today.strftime('%Y%m%d'))
+        finish = len(self.listed_codes)
+        with self.conn.cursor() as curs:
+            for cnt, code in enumerate(self.listed_codes, start=1):
+                cpStockChart.SetInputValue(0, code)  # 종목 코드 - 삼성전자
+                cpStockChart.SetInputValue(1, ord('1'))  # 기간
+                cpStockChart.SetInputValue(2, end_date)  # end
+                cpStockChart.SetInputValue(3, start_date)  # start
+                cpStockChart.SetInputValue(5, [0,2,3,4,5,8,9,12,13,17,18,19,20,21])
+                # 0:날짜, 23458:OHLCV, 9:거래대금, 12:상장주식수, 13:시가총액, 17:외인보유비율
+                # 18:수정일자, 19:수정주가비율,20:기관순매수, 21:기관누적순매수
+                cpStockChart.SetInputValue(6, ord('D'))  # 일봉
+                cpStockChart.SetInputValue(9, ord('1')) # 수정
+                cpStockChart.BlockRequest()
+
+                idx_len = cpStockChart.GetHeaderValue(3)
+                for i in range(idx_len):
+                    dateint = cpStockChart.GetDataValue(0, i)
+                    sh7code = code
+                    open  = cpStockChart.GetDataValue(1, i)
+                    high = cpStockChart.GetDataValue(2, i)
+                    low = cpStockChart.GetDataValue(3, i)
+                    close = cpStockChart.GetDataValue(4, i)
+                    vol = cpStockChart.GetDataValue(5, i)
+                    trd_val = cpStockChart.GetDataValue(6, i)
+                    listed_sh = cpStockChart.GetDataValue(7, i)
+                    mc = cpStockChart.GetDataValue(8, i)
+                    frg_holding = cpStockChart.GetDataValue(9, i)
+                    adj_dateint = cpStockChart.GetDataValue(10, i)
+                    adj_ratio = cpStockChart.GetDataValue(11, i)
+                    org_na = cpStockChart.GetDataValue(12, i)
+                    org_cum_na = cpStockChart.GetDataValue(13, i)
+
+                    sql = f"""
+                    REPLACE INTO daily_price VALUES (
+                        {dateint}, '{sh7code}', {open}, {high}, {low}, {close},{vol}, {trd_val}, {listed_sh}
+                        , {mc}, {frg_holding}, {adj_dateint}, {adj_ratio}, {org_na}, {org_cum_na}, '{today}')
+                    """
+                    curs.execute(sql)
+                self.conn.commit()
+                
+                print(f'Daily Price Info Update: {cnt} / {finish}', end='\r')
+                
+        print('Daily Price Information Update: Success')
