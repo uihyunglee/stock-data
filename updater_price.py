@@ -39,7 +39,26 @@ class PriceUpdater:
                 PRIMARY KEY (sh7code))
             """
             curs.execute(sql)
-
+            sql = """
+            CREATE TABLE IF NOT EXISTS daily_price (
+                dateint INT(10),
+                sh7code VARCHAR(10),
+                open BIGINT(20),
+                high BIGINT(20),
+                low BIGINT(20),
+                close BIGINT(20),
+                vol BIGINT(20),
+                trd_val BIGINT(20),
+                listed_sh BIGINT(20),
+                mc BIGINT(20),
+                frg_holding BIGINT(20),
+                adj_dateint INT(10),
+                adj_ratio INT(10),
+                org_na BIGINT(20),
+                org_cum_na BIGINT(20),
+                PRIMARY KEY (dateint, sh7code))
+            """
+            curs.execute(sql)
         self.conn.commit()
         
         self.listed_codes = self.get_listed_stocks()
@@ -48,11 +67,9 @@ class PriceUpdater:
         # 관리자 권한으로 프로세스 실행 여부
         if not ctypes.windll.shell32.IsUserAnAdmin():
             raise Exception('check_creon_system() : admin user -> FAILED')
-
         # 연결 여부 체크
         if (cpStatus.IsConnect == 0):
             raise Exception('check_creon_system() : connect to server -> FAILED')
-
         # 주문 관련 초기화
         if (cpTradeUtil.TradeInit(0) != 0):
             raise Exception('check_creon_system() : init trade -> FAILED')
@@ -91,3 +108,4 @@ class PriceUpdater:
                 print(f'Company Info Update: {cnt} / {finish}', end='\r')
                 
         print('Company information Update: Success')
+
