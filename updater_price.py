@@ -170,3 +170,13 @@ class PriceUpdater:
                 print(f'Daily Price Info Update: {cnt} / {finish}', end='\r')
                 
         print('Daily Price Information Update: Success')
+
+
+# 평일 오후 20시 실행 예정        
+if __name__ == '__main__':
+    today = dt.today().weekday
+    if today != 5 and today != 6:
+        pu = PriceUpdater()
+        pu.check_creon_system()
+        pu.update_company_info()
+        pu.update_daily_price_info()
