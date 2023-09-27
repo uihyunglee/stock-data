@@ -1,12 +1,11 @@
-from datetime import datetime as dt
 import json
-import sys
+from datetime import datetime as dt
 
 import numpy as np
 import pandas as pd
-from bs4 import BeautifulSoup
-import requests
 import pymysql
+import requests
+from bs4 import BeautifulSoup
 
 
 def get_last_page(html):

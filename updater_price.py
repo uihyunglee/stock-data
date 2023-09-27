@@ -1,12 +1,10 @@
 import ctypes
+import json
 from datetime import datetime as dt
 from datetime import timedelta as td
-import win32com.client
-import json
 
-import numpy as np
-import pandas as pd
 import pymysql
+import win32com.client
 
 cpStatus = win32com.client.Dispatch('CpUtil.CpCybos') # 시스템 상태 정보
 cpTradeUtil = win32com.client.Dispatch('CpTrade.CpTdUtil') # 주문 관련 도구
