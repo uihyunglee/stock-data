@@ -27,7 +27,7 @@ class DBmgr:
         else:
             and_code = ''
         sql = f"SELECT theme_code, stock_code FROM theme WHERE dateint = {date} {and_code}"
-        theme_data_df = pd.read_sql(sql, self.conn)
-        theme_data_df['stock_code'] = theme_data_df['stock_code'].apply(lambda str_: str_.split(','))
-        theme_data_df.set_index('theme_code', drop=True, inplace=True)
-        return theme_data_df
+        theme_df = pd.read_sql(sql, self.conn)
+        theme_df['stock_code'] = theme_df['stock_code'].apply(lambda str_: str_.split(','))
+        theme_df.set_index('theme_code', drop=True, inplace=True)
+        return theme_df
