@@ -34,16 +34,11 @@ class DBmgr:
         theme_df.set_index('theme_code', drop=True, inplace=True)
         return theme_df
     
-    def get_stock_data(self, code=None, start_date=None, end_date=None, only_ohlcv=False):
-        if start_date == None:
-            start_date = '1980_01_01'
-        if end_date == None:
-            end_date = TODAY
+    def get_stock_data(self, code=None, start_date='1980_01_01', end_date=TODAY, only_ohlcv=False):
         start_date = int(re.sub(r'[^0-9]', '', start_date))
         end_date = int(re.sub(r'[^0-9]', '', end_date))
         
-        ohlcv_cond = 'dateint, sh7code, open, high, low, close, vol' if only_ohlcv else '*'
-        
+        ohlcv_cond = 'dateint, sh7code, open, high, low, close, vol' if only_ohlcv else '*' 
         if code == None:
             sql = f"""
             SELECT {ohlcv_cond} FROM daily_price
