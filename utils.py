@@ -52,3 +52,24 @@ class DBmgr:
             """
         df = pd.read_sql(sql, self.conn)
         return df
+    
+    def get_preNdays_price(self, code, date=TODAY, N=5, price_type='close'):
+        date = int(re.sub(r'[^0-9]', '', date))
+        with self.conn.cursor() as curs:
+            sql = f"""
+            SELECT DISTINCT dateint FROM daily_price
+            WHERE dateint < {date}
+            ORDER BY dateint DESC
+            LIMIT 1 OFFSET {N-1}
+            """
+            curs.execute(sql)
+            rs = curs.fetchone()
+            start_date = str(rs[0])
+        target_code = f"('{code}')" if isinstance(code, str) else tuple(code)
+        sql = f"""
+        SELECT dateint, sh7code, {price_type} FROM daily_price
+        WHERE sh7code IN {target_code}
+        AND dateint >= {start_date} AND dateint < {date}
+        """        
+        df = pd.read_sql(sql, self.conn)
+        return df
