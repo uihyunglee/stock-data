@@ -1,3 +1,4 @@
+from datetime import datetime as dt
 import json
 import re
 
@@ -6,6 +7,7 @@ import pandas as pd
 
 import pymysql
 
+TODAY = dt.now.strftime('%Y%m%d')
 
 class DBmgr:
     def __init__(self):
@@ -36,7 +38,7 @@ class DBmgr:
         if start_date == None:
             start_date = '1980_01_01'
         if end_date == None:
-            end_date = '2194_12_31'
+            end_date = TODAY
         start_date = int(re.sub(r'[^0-9]', '', start_date))
         end_date = int(re.sub(r'[^0-9]', '', end_date))
         
