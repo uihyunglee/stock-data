@@ -31,3 +31,27 @@ class DBmgr:
         theme_df['stock_code'] = theme_df['stock_code'].apply(lambda str_: str_.split(','))
         theme_df.set_index('theme_code', drop=True, inplace=True)
         return theme_df
+    
+    def get_stock_data(self, code=None, start_date=None, end_date=None, only_ohlcv=False):
+        if start_date == None:
+            start_date = '1980_01_01'
+        if end_date == None:
+            end_date = '2194_12_31'
+        start_date = int(re.sub(r'[^0-9]', '', start_date))
+        end_date = int(re.sub(r'[^0-9]', '', end_date))
+        
+        ohlcv_cond = 'dateint, sh7code, open, high, low, close, vol' if only_ohlcv else '*'
+        
+        if code == None:
+            sql = f"""
+            SELECT {ohlcv_cond} FROM daily_price
+            WHERE dateint BETWEEN {start_date} AND {end_date}
+            """
+        else:
+            target_code = f"('{code}')" if isinstance(code, str) else tuple(code)
+            sql = f"""
+            SELECT {ohlcv_cond} FROM daily_price
+            WHERE (sh7code IN {target_code}) AND (dateint BETWEEN '{start_date}' AND '{end_date}')
+            """
+        df = pd.read_sql(sql, self.conn)
+        return df
