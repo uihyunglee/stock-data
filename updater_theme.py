@@ -15,7 +15,6 @@ def get_last_page(html):
     lastpage = s[-1]
     return int(lastpage)
     
-    
 def read_today_theme():
     url = "https://finance.naver.com/sise/theme.naver"
     html = requests.get(url, headers={'User-agent' : 'Mozilla/5.0'}).text
@@ -48,6 +47,8 @@ def read_today_theme():
     except ValueError:
         theme_df['rtn'][theme_df['rtn'] == ''] = '0'
         theme_df['rtn'] = theme_df['rtn'].astype(np.float64)
+    if (theme_df.index.value_counts() > 1).sum() != 0:
+        theme_df = read_today_theme()
     return theme_df
 
 
