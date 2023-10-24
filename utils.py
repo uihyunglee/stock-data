@@ -34,6 +34,14 @@ class DBmgr:
         theme_df.set_index('theme_code', drop=True, inplace=True)
         return theme_df
     
+    def get_stock_list(self, table):
+        sql = f"""
+        SELECT UNIQUE(sh7code) FROM {table}
+        WHERE sh7code LIKE 'A%'
+        """
+        df = pd.read_sql(sql, self.conn)
+        return list(df.values.reshape(-1))
+    
     def get_stock_data(self, code=None, start_date='1980_01_01', end_date=TODAY, only_ohlcv=False):
         start_date = int(re.sub(r'[^0-9]', '', start_date))
         end_date = int(re.sub(r'[^0-9]', '', end_date))
