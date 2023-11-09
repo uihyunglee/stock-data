@@ -16,8 +16,8 @@ def get_last_page(html):
     return int(lastpage)
     
 def read_today_theme():
-    url = "https://finance.naver.com/sise/theme.naver"
-    html = requests.get(url, headers={'User-agent' : 'Mozilla/5.0'}).text
+    root_url = "https://finance.naver.com/sise/theme.naver?field=name&ordering=asc"
+    html = requests.get(root_url, headers={'User-agent' : 'Mozilla/5.0'}).text
     pages = get_last_page(html)
     
     total_theme_name = []
@@ -25,7 +25,7 @@ def read_today_theme():
     total_theme_rtn = []
     
     for p in range(1, pages+1):
-        url = f"https://finance.naver.com/sise/theme.naver?&page={p}"
+        url = f"{root_url}&page={p}"
         html = requests.get(url,  headers={'User-agent' : 'Mozilla/5.0'}).text
         bs = BeautifulSoup(html, 'lxml')
         
@@ -41,14 +41,9 @@ def read_today_theme():
         total_theme_rtn += theme_rtn
         
     theme_df = pd.DataFrame(index=total_theme_code, columns=['name', 'rtn'], data = np.array([total_theme_name, total_theme_rtn]).T)
-    
-    try:
-        theme_df['rtn'] = theme_df['rtn'].astype(np.float64)
-    except ValueError:
-        theme_df['rtn'][theme_df['rtn'] == ''] = '0'
-        theme_df['rtn'] = theme_df['rtn'].astype(np.float64)
-    if (theme_df.index.value_counts() > 1).sum() != 0:
-        theme_df = read_today_theme()
+
+    theme_df['rtn'][theme_df['rtn'] == ''] = '0'
+    theme_df['rtn'] = theme_df['rtn'].astype(np.float64)
     return theme_df
 
 
