@@ -5,3 +5,4 @@ beautifulsoup4
 pywin32
 pywinauto
 requests
+lxml
