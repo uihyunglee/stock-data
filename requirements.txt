@@ -2,5 +2,6 @@ numpy
 pandas
 pymysql
 beautifulsoup4
-win32com
+pywin32
 pywinauto
+requests
